@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import itertools
+import sys
 
 
 # function HammingG
@@ -171,13 +172,13 @@ def hamming_brute_force(v):
             if currentDifference < minimum_difference:
                 minimum_difference = currentDifference
                 actual_codeword = list_of_generated_codewords[i]
-            print("m", i, " G = ", list_of_generated_codewords[i])
-            print("d(v, m", i, " G) = ", currentDifference)
+            # print("m", i, " G = ", list_of_generated_codewords[i])
+            # print("d(v, m", i, " G) = ", currentDifference)
             if minimum_difference == 1:
                 break
-            else:
-                print()
-        print("hatc: ", actual_codeword)
+            # else:
+            #     print()
+        print("hatc: ", actual_codeword, "  -  Minimum Difference: ", minimum_difference)
     return actual_codeword
 
 
@@ -307,6 +308,7 @@ def hamming_syndrome(v):
         all_zeroes = not decoded_vector.any()
         if all_zeroes:
             print("syndrome = ", decoded)
+            print("hatc = ", v)
             return v
         else:
             decoded_string = ''
@@ -386,13 +388,13 @@ def simulation(a, p):
     print("Raw data")
     print("a: ", a)
     m = message(a)
-    print("\nMessage")
+    print("\nMessage of raw data")
     print("m: ", m)
     hEncoded = hamming_encoder(m)
-    print("\nCodeword")
+    print("\nHamming Encoded Codeword")
     print("c: ", hEncoded)
     noisified = BSC(hEncoded, p)
-    print("\nRecieved Vector")
+    print("\nReceived vector after noisy transmission")
     print("v: ", noisified)
     print()
     decoded1 = hamming_brute_force(noisified)
@@ -402,24 +404,44 @@ def simulation(a, p):
     decoded3 = hamming_syndrome(noisified)
     if decoded1 == decoded2 == decoded3:
         print()
-        print("Codeword")
+        print("Deduced Codeword")
         print("hatc: ", decoded1)
         print()
         decodedMessage = message_from_codeword(decoded1)
-        print("Message")
+        print("Converted to Message")
         print("hatm: ", decodedMessage)
         print()
         decodedRawData = data_from_message(decodedMessage)
-        print("Raw data")
+        print("Received Raw data")
         print("hata: ", decodedRawData)
         if a == decodedRawData:
             print()
-            print("Success!")
+            print("Success! - All decoding methods return the same data.")
         else:
             print()
-            print("Transmission failure")
+            print("Transmission failure - Received decoded data is different to transmitted data ")
     else:
         print("Decoder error - decoded message is different from different decoding algorithms")
 
 
-simulation([0, 1, 1, 0], 0.0)
+# get command line data
+try:
+    r_data = sys.argv[1]
+    bsc = sys.argv[2]
+    # check that command line data is of the right format
+    try:
+        raw_data = []
+        for i in r_data:
+            if i == "1":
+                raw_data.append(1)
+            elif i == "0":
+                raw_data.append(0)
+        print(r_data, raw_data, type(r_data))
+        simulation(raw_data, float(bsc))
+    except Exception as msg:
+        print(msg)
+except Exception:
+    print("Not enough arguments")
+    exit()
+
+
